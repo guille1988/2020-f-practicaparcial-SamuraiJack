@@ -54,5 +54,40 @@ llegar a matarlo con un solo elemento. Esto sucede si luego de aplicar el efecto
 el personaje queda con salud igual a 0.
 -}
 
+type Enemigo = Personaje
+
+type Enemigos = [Enemigo]
+
+esMalvado :: Personaje -> Bool
+esMalvado personaje = any ((=="Maldad").tipo) (elementos personaje) 
+
+danioQueProduce :: Personaje -> Elemento -> Float
+danioQueProduce personaje elemento = (salud personaje) - (salud ((ataque elemento) personaje))
+
+enemigosMortales :: Personaje -> Enemigos -> Enemigos
+enemigosMortales personaje enemigos = filter (puedenLlegarAmatarlo personaje) enemigos
+
+puedenLlegarAmatarlo :: Personaje -> Enemigo -> Bool
+puedenLlegarAmatarlo personaje enemigo = salud ((ataque (head (elementos enemigo))) personaje) == 0
+
+--PUNTO 3--
+
+{-
+ Definir los siguientes personajes y elementos:
+Definir concentracion de modo que se pueda obtener un elemento cuyo efecto defensivo sea aplicar meditar tantas 
+veces como el nivel de concentración indicado y cuyo tipo sea "Magia".
+Definir esbirrosMalvados que recibe una cantidad y retorna una lista con esa cantidad de esbirros 
+(que son elementos de tipo “Maldad” cuyo efecto ofensivo es causar un punto de daño).
+Definir jack de modo que permita obtener un personaje que tiene 300 de salud, que tiene como elementos 
+concentración nivel 3 y una katana mágica (de tipo "Magia" cuyo efecto ofensivo es causar 1000 puntos de daño) y vive en el año 200.
+Definir aku :: Int -> Float -> Personaje que recibe el año en el que vive y la cantidad de salud con la que debe ser construido. 
+Los elementos que tiene dependerán en parte de dicho año. Los mismos incluyen:
+Concentración nivel 4
+Tantos esbirros malvados como 100 veces el año en el que se encuentra.
+Un portal al futuro, de tipo “Magia” cuyo ataque es enviar al personaje al futuro 
+(donde el futuro es 2800 años después del año indicado para aku), y su defensa genera un nuevo aku para el año futuro 
+correspondiente que mantenga la salud que tenga el personaje al usar el portal.
+-}
+
 
 
