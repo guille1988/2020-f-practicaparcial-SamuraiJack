@@ -33,13 +33,13 @@ mandarAlAnio :: Int -> Personaje -> Personaje
 mandarAlAnio anio personaje = personaje {anioPresente = anio}
 
 meditar :: Personaje -> Personaje
-meditar personaje = personaje {salud = alterarSalud (/2) (salud personaje)}
+meditar = alterarSalud (/2) 
 
 causarDanio :: Float -> Personaje -> Personaje
-causarDanio valorDeSalud personaje = personaje {salud = alterarSalud (subtract valorDeSalud) (salud personaje)}
+causarDanio valorDeSalud  = alterarSalud (subtract valorDeSalud)
 
-alterarSalud :: (Float -> Float) -> Float -> Float
-alterarSalud operacion valor = max (operacion valor) 0
+alterarSalud :: (Float -> Float) -> Personaje -> Personaje
+alterarSalud operacion personaje = personaje { salud = max (operacion (salud personaje)) 0}
 
 
 --PUNTO 2--
@@ -78,6 +78,25 @@ Definir concentracion de modo que se pueda obtener un elemento cuyo efecto defen
 veces como el nivel de concentración indicado y cuyo tipo sea "Magia".
 Definir esbirrosMalvados que recibe una cantidad y retorna una lista con esa cantidad de esbirros 
 (que son elementos de tipo “Maldad” cuyo efecto ofensivo es causar un punto de daño).
+-}
+
+type Elementos = [Elemento]
+
+noHacerNada = id
+
+concentracion :: Int -> Elemento
+concentracion nivelDeConcentracion = UnElemento { 
+tipo = "Magia",
+ataque = noHacerNada,
+defensa = (!! nivelDeConcentracion) . iterate meditar 
+}
+
+esbirros = UnElemento "Maldad" (causarDanio 1) noHacerNada
+
+esbirrosMalvados :: Int -> Elementos
+esbirrosMalvados cantidad = replicate cantidad esbirros
+
+{-
 Definir jack de modo que permita obtener un personaje que tiene 300 de salud, que tiene como elementos 
 concentración nivel 3 y una katana mágica (de tipo "Magia" cuyo efecto ofensivo es causar 1000 puntos de daño) y vive en el año 200.
 Definir aku :: Int -> Float -> Personaje que recibe el año en el que vive y la cantidad de salud con la que debe ser construido. 
@@ -89,5 +108,54 @@ Un portal al futuro, de tipo “Magia” cuyo ataque es enviar al personaje al f
 correspondiente que mantenga la salud que tenga el personaje al usar el portal.
 -}
 
+jack :: Personaje
+jack = UnPersonaje {
+nombre = "Jack",
+salud = 300,
+elementos = [(concentracion 3),katanaMagica],
+anioPresente = 200
+}
+
+katanaMagica = UnElemento "Magia" (causarDanio 1000) noHacerNada
+
+aku :: Int -> Float -> Personaje
+aku anioQueVive salud = UnPersonaje {
+nombre = "Aku",
+salud = salud,
+anioPresente = anioQueVive,
+elementos = concentracion 4 : (portalAlFuturoDesde anioQueVive): esbirrosMalvados (anioQueVive * 100) 
+}
+
+portalAlFuturoDesde anio = UnElemento "Magia" (mandarAlAnio anioFuturo) (aku anioFuturo.salud)
+  where anioFuturo = anio + 2800
+
+--PUNTO 4--
+
+{-
+Finalmente queremos saber cómo puede concluir la lucha entre Jack y Aku.
+ Para ello hay que definir la función luchar :: Personaje -> Personaje -> (Personaje, Personaje) donde 
+ se espera que si el primer personaje (el atacante) está muerto, retorne la tupla con el defensor primero y el atacante después,
+  en caso contrario la lucha continuará invirtiéndose los papeles (el atacante será el próximo defensor) luego de que 
+  ambos personajes se vean afectados por el uso de todos los elementos del atacante.
+-}
+
+luchar :: Personaje -> Personaje -> (Personaje, Personaje)
+luchar jack aku 
+ | (salud jack) == 0 = (aku,jack)
+ | (personajeAtaca jack aku) > (personajeAtaca jack aku) = (jack,aku)
+ | otherwise = (aku,jack)
 
 
+personajeAtaca :: Personaje -> Enemigo -> Float
+personajeAtaca personaje enemigo = salud (foldr ($) enemigo (map  ataque  (elementos personaje)))
+
+--PUNTO 5--
+
+f x y z
+    | y 0 == z = map (fst.x z)
+    | otherwise = map (snd.x (y 0))
+
+--(Eq t1, Num t2) =>
+--(t1 -> a1 -> (a2, a2)) -> (t2 -> t1) -> t1 -> [a1] -> [a2]
+
+--THE END--
